@@ -1,0 +1,18 @@
+--- 
+title: "Redes multicapa aplicadas al análisis de la microbiota"
+author: "Víctor Lázaro Vidal"
+date: "`r Sys.Date()`"
+site: bookdown::bookdown_site
+documentclass: book
+bibliography: [book.bib, packages.bib]
+# url: your book url like https://bookdown.org/yihui/bookdown
+# cover-image: path to the social sharing image like images/cover.jpg
+description: |
+  Scripts for multilayer networks with 3 different data bases.
+link-citations: yes
+github-repo: rstudio/bookdown-demo
+---
+
+# Resumen
+##Summary
+##Objetivos
