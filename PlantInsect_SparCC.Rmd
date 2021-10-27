@@ -149,13 +149,13 @@ g_abundance<-function(layer_mat, g){
 
 Graficamos las abundancias relativas de ambas capas con la función g_abundance()
 ```{r}
-insect_gab<-g_abundance(layer_mat = Insectmat, g = insect_sparCC)
-plant_gab<-g_abundance(layer_mat = Plantmat, g = plant_sparCC)
-plot(insect_gab, vertex.label.color="black",
-      vertex.color = vertex.attributes(insect_gab)$rel_ab, vertex.label.cex=.5,
+insect_sparCC<-g_abundance(layer_mat = Insectmat, g = insect_sparCC)
+plant_sparCC<-g_abundance(layer_mat = Plantmat, g = plant_sparCC)
+plot(insect_sparCC, vertex.label.color="black",
+      vertex.color = vertex.attributes(insect_sparCC)$rel_ab, vertex.label.cex=.5,
       vertex.label.dist=1,layout=layout_with_kk, vertex.size = 5)
-plot(plant_gab, vertex.label.color="black",
-      vertex.color = vertex.attributes(plant_gab)$rel_ab, vertex.label.cex=.5,
+plot(plant_sparCC, vertex.label.color="black",
+      vertex.color = vertex.attributes(plant_sparCC)$rel_ab, vertex.label.cex=.5,
       vertex.label.dist=1,layout=layout_with_kk, vertex.size = 5)
 ```
 
@@ -194,13 +194,13 @@ TaxGroup<-function(g, T_table, g_tax, p_tax){
     IDs<-which(unq[i] == T_table[,g_tax])
     t_names<-unique(T_table[p_tax][IDs,])
     vertex<-which(vertex.attributes(g)$name %in% t_names)
-    V(g)[vertex]$Group<-unq[i]
+    V(g)[vertex]$Taxon<-unq[i]
   }
   return(g)
 }
 insect_sparCC<-TaxGroup(insect_sparCC, T_table, "Phylum", "Genus")
 plant_sparCC<-TaxGroup(plant_sparCC, T_table, "Phylum", "Genus")
-vertex.attributes(insect_sparCC)$Group[1:12]
+vertex.attributes(insect_sparCC)$Taxon[1:12]
 ```
 Construimos una función que nos permite colorear los nodos en función de su centralidad. El objeto ctr_type puede corresponder a "degree", "betweenness" y "closeness".
 ```{r}
