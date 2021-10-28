@@ -1,0 +1,128 @@
+# Multiplex Lema-Datura aracne
+
+Se cargan los datos y se extraen los datos de los taxones y los otus almacenados en objeto ps2.
+```{r echo=FALSE, cache=FALSE, results=FALSE, warning=FALSE, comment=FALSE, writing=FALSE}
+library(igraph)
+library(phyloseq)
+setwd("C:/Users/LaV_V/Downloads")
+print(load("mis_phyloseq.RData"))
+T_table<-as.data.frame(tax_table(ps2)); dim(T_table)
+O_table<-as.data.frame(t(otu_table(ps2))); dim(O_table)
+```
+
+Se cargan los datos y se extraen los datos de los taxones y los otus almacenados en objeto ps2.
+```{r echo=FALSE, cache=FALSE, results=FALSE, warning=FALSE, comment=FALSE, writing=FALSE}
+library(igraph)
+library(phyloseq)
+setwd("C:/Users/LaV_V/Downloads")
+print(load("mis_phyloseq.RData"))
+T_table<-as.data.frame(tax_table(ps2)); dim(T_table)
+O_table<-as.data.frame(t(otu_table(ps2))); dim(O_table)
+```
+
+Se ingresa primero la tabla de taxones, luego la tabla de otus y finalmente el nivel taxonómico al cual se desea sintetizar la tabla.
+```{r echo=FALSE, cache=FALSE, results=FALSE, warning=FALSE, comment=FALSE, writing=FALSE}
+T_Collapsed<-T_collapse(T_table = T_table, O_table = O_table,
+                        names_level = "Genus")
+dim(T_Collapsed)
+```
+
+Se identifican los elementos no clasificados para ser eliminados.
+```{r}
+colnames(T_Collapsed)[1:10]
+T_Collapsed<-T_Collapsed[, -c(which(colnames(T_Collapsed) == "unclassified"))]
+colnames(T_Collapsed)[1:10]
+```
+
+Se identifican los elementos pertenecientes a la planta y al insecto.
+```{r}
+Insect<-which(sample_data(ps2)$Type =="Insect")
+Insect<-sample_data(ps2)$ID[Insect]; Insect
+Plant<-which(sample_data(ps2)$Type =="Plant")
+Plant<-sample_data(ps2)$ID[Plant]; Plant
+```
+
+Generamos matrices independientes para los datos de la planta y del insecto.
+```{r}
+Insectmat <- T_Collapsed[Insect,]
+Plantmat <- T_Collapsed[Plant,]
+```
+
+Construímos la red correspondiente a los datos de abundancias del insecto.
+```{r}
+library(minet)
+mim <- build.mim(Insectmat,estimator="spearman")
+Insectmat <- aracne(mim)
+insect_aracne<-graph.adjacency(Insectmat)
+plot_network(insect_aracne)
+```
+
+Construímos la red correspondiente a los datos de abundancias de la planta.
+```{r}
+mim <- build.mim(Plantmat,estimator="spearman")
+Plantmat <- aracne(mim)
+plant_aracne<-graph.adjacency(Plantmat)
+plot_network(plant_aracne)
+```
+Se colorean las redes a nivel de phylum usando la función v_colored()
+```{r}
+unq<-unique(T_table[,"Phylum"])
+colors<-rainbow(length(unq))
+insect_aracne<-v_colored(insect_aracne, T_table, g_tax = "Phylum",
+               p_tax = "Genus", g_colors = colors)
+plant_aracne<-v_colored(plant_aracne, T_table, g_tax = "Phylum", p_tax = "Genus",
+                   g_colors = colors)
+#Gráfico de insecto
+plot(insect_aracne, vertex.label.color="black",
+     vertex.color = vertex.attributes(insect_aracne)$color, vertex.label.cex=.5,
+     vertex.label.dist=1,layout=layout_with_kk, vertex.size = 5)
+legend(x=-2.7, y=-0.3, unq, title = "Insect", pch=21, pt.bg=colors, pt.cex=2, cex=.8, bty="n", ncol=1)
+#Gráfico de planta
+plot(plant_aracne, vertex.label.color="black",
+     vertex.color = vertex.attributes(plant_aracne)$color, vertex.label.cex=.5,
+     vertex.label.dist=1,layout=layout_with_kk, vertex.size = 5)
+legend(x=-2.7, y=-0.3, unq, title = "Plant", pch=21, pt.bg=colors, pt.cex=2, cex=.8, bty="n", ncol=1)
+```
+Graficamos las abundancias relativas de ambas capas con la función g_abundance()
+```{r}
+insect_aracne<-g_abundance(layer_mat = Insectmat, g = insect_aracne)
+plant_aracne<-g_abundance(layer_mat = Plantmat, g = plant_aracne)
+plot(insect_aracne, vertex.label.color="black",
+      vertex.color = vertex.attributes(insect_aracne)$rel_ab, vertex.label.cex=.5,
+      vertex.label.dist=1,layout=layout_with_kk, vertex.size = 5)
+plot(plant_aracne, vertex.label.color="black",
+      vertex.color = vertex.attributes(plant_aracne)$rel_ab, vertex.label.cex=.5,
+      vertex.label.dist=1,layout=layout_with_kk, vertex.size = 5)
+```
+Generamos un objeto muxViz como una lista de redes igraph, y se construye una matriz de abundancias.
+```{r}
+library(muxViz)
+g.list<-list(insect_aracne, plant_aracne)
+insect_ab<-colSums(Insectmat)
+insect_ab<-as.numeric((insect_ab)/insect_ab[which.max(insect_ab)])
+plant_ab<-colSums(Plantmat)
+plant_ab<-as.numeric((plant_ab)/plant_ab[which.max(plant_ab)])
+abundances<-c(insect_ab, plant_ab)
+Nodes<-length(V(insect_aracne))
+Layers<-length(g.list)
+node.ab.matrix <- matrix((abundances+1)*10, Nodes, Layers)
+```
+Construímos el gráfico 3D de una red multicapa multiplex con el paquete muxViz.
+```{r echo=FALSE, cache=FALSE, results=FALSE, warning=FALSE, comment=FALSE, warning=FALSE}
+lay <- layoutMultiplex(g.list, layout="fr", ggplot.format=F, box=T)
+plot_multiplex3D(g.list, layer.layout=lay,
+                 layer.colors=rainbow(length(g.list)),
+                 layer.shift.x=0.5, layer.space=2,
+                 layer.labels=c("Insect", "Plant"), layer.labels.cex=1.5,
+                 node.size.values=node.ab.matrix, node.size.scale=0.6,
+                 node.colors=vertex.attributes(insect_aracne)$color,
+                 edge.colors="white",
+                 node.colors.aggr=vertex.attributes(insect_aracne)$color,
+                 show.aggregate=T)
+```
+Buscamos a qué clado pertenece cada uno de los géneros.
+```{r}
+insect_sparCC<-TaxGroup(insect_aracne, T_table, "Phylum", "Genus")
+plant_sparCC<-TaxGroup(plant_aracne, T_table, "Phylum", "Genus")
+vertex.attributes(insect_aracne)$Taxon[1:12]
+```
