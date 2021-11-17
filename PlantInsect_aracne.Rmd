@@ -9,17 +9,6 @@ print(load("mis_phyloseq.RData"))
 T_table<-as.data.frame(tax_table(ps2)); dim(T_table)
 O_table<-as.data.frame(t(otu_table(ps2))); dim(O_table)
 ```
-
-Se cargan los datos y se extraen los datos de los taxones y los otus almacenados en objeto ps2.
-```{r echo=FALSE, cache=FALSE, results=FALSE, warning=FALSE, comment=FALSE, writing=FALSE}
-library(igraph)
-library(phyloseq)
-setwd("C:/Users/LaV_V/Downloads")
-print(load("mis_phyloseq.RData"))
-T_table<-as.data.frame(tax_table(ps2)); dim(T_table)
-O_table<-as.data.frame(t(otu_table(ps2))); dim(O_table)
-```
-
 Se ingresa primero la tabla de taxones, luego la tabla de otus y finalmente el nivel taxonómico al cual se desea sintetizar la tabla.
 ```{r echo=FALSE, cache=FALSE, results=FALSE, warning=FALSE, comment=FALSE, writing=FALSE}
 T_Collapsed<-T_collapse(T_table = T_table, O_table = O_table,
@@ -52,16 +41,18 @@ Construímos la red correspondiente a los datos de abundancias del insecto.
 ```{r}
 library(minet)
 mim <- build.mim(Insectmat,estimator="spearman")
-Insectmat <- aracne(mim)
-insect_aracne<-graph.adjacency(Insectmat)
+InsectmatA <- aracne(mim)
+insect_aracne<-graph.adjacency(InsectmatA)
+insect_aracne<-as.undirected(insect_aracne)
 plot_network(insect_aracne)
 ```
 
 Construímos la red correspondiente a los datos de abundancias de la planta.
 ```{r}
 mim <- build.mim(Plantmat,estimator="spearman")
-Plantmat <- aracne(mim)
-plant_aracne<-graph.adjacency(Plantmat)
+PlantmatA <- aracne(mim)
+plant_aracne<-graph.adjacency(PlantmatA)
+plant_aracne<-as.undirected(plant_aracne)
 plot_network(plant_aracne)
 ```
 Se colorean las redes a nivel de phylum usando la función v_colored()
@@ -122,7 +113,7 @@ plot_multiplex3D(g.list, layer.layout=lay,
 ```
 Buscamos a qué clado pertenece cada uno de los géneros.
 ```{r}
-insect_sparCC<-TaxGroup(insect_aracne, T_table, "Phylum", "Genus")
-plant_sparCC<-TaxGroup(plant_aracne, T_table, "Phylum", "Genus")
+insect_aracne<-TaxGroup(insect_aracne, T_table, "Phylum", "Genus")
+plant_aracne<-TaxGroup(plant_aracne, T_table, "Phylum", "Genus")
 vertex.attributes(insect_aracne)$Taxon[1:12]
 ```
