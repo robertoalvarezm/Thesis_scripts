@@ -1,4 +1,4 @@
-# Multiplex Lema-Datura aracne
+# Multiplex Lema-Datura ARACNe
 
 Se cargan los datos y se extraen los datos de los taxones y los otus almacenados en objeto ps2.
 ```{r echo=FALSE, cache=FALSE, results=FALSE, warning=FALSE, comment=FALSE, writing=FALSE}
