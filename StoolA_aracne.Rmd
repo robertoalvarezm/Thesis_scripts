@@ -202,40 +202,18 @@ plot_multiplex3D(g.list_bt, layer.layout=lay,
                  node.size.scale=0.8, node.colors=node.colors.matrix,
                  edge.colors="#dadada", show.aggregate=F)
 ```
-Construcción de gráfico de red multiplex 3D para closeness.
-```{r cache=FALSE, results=FALSE, warning=FALSE, comment=FALSE, writing=FALSE}
-g.list_cl<-ctr(g.list, ctr_type = "closeness")
-hl1<-as.vector(vertex.attributes(g.list_cl[[1]])$hl)
-hl2<-as.vector(vertex.attributes(g.list_cl[[2]])$hl)
-hl3<-as.vector(vertex.attributes(g.list_cl[[3]])$hl)
-hl_colors<-c(hl1, hl2, hl3)
-Nodes<-length(V(g.list[[1]]))
-Layers<-length(g.list)
-node.colors.matrix <- matrix(hl_colors, Nodes, Layers)
-lay <- layoutMultiplex(g.list_cl, layout="fr", ggplot.format=F, box=T)
-plot_multiplex3D(g.list_cl, layer.layout=lay,
-                 layer.colors=rainbow(length(g.list_cl)),
-                 layer.shift.x=0.5, layer.space=2,
-                 layer.labels=c("Before travel", "During travel", "After travel"),
-                 layer.labels.cex=1.5, node.size.values="auto",
-                 node.size.scale=0.8, node.colors=node.colors.matrix,
-                 edge.colors="#dadada", show.aggregate=F)
-```
 Generamos redes agregadas para cada tipo de centralidad y las introducimos como un objeto muxViz. Generamos una matriz de colores correspondiente a tres tipos distintos de centralidades: degree, betweenness y closeness.
 ```{r}
 net_d<-GetAggregateNetworkFromNetworkList(g.list_d)
 net_bt<-GetAggregateNetworkFromNetworkList(g.list_bt)
-net_cl<-GetAggregateNetworkFromNetworkList(g.list_cl)
-central_muxlist<-list(net_d, net_bt, net_cl)
+central_muxlist<-list(net_d, net_bt)
 
 d<-ctr(central_muxlist, ctr_type = "degree")
 hl_d<-as.vector(vertex.attributes(d[[1]])$hl)
 bt<-ctr(central_muxlist, ctr_type = "betweenness")
 hl_bt<-as.vector(vertex.attributes(bt[[2]])$hl)
-cl<-ctr(central_muxlist, ctr_type = "closeness")
-hl_cl<-as.vector(vertex.attributes(cl[[3]])$hl)
 
-hl_colors2<-c(hl_d, hl_bt, hl_cl)
+hl_colors2<-c(hl_d, hl_bt)
 Nodes<-length(V(central_muxlist[[1]]))
 Layers<-length(central_muxlist)
 node.colors.matrix <- matrix(hl_colors2, Nodes, Layers)
@@ -256,7 +234,7 @@ lay <- layoutMultiplex(central_muxlist, layout="fr", ggplot.format=F, box=T)
 plot_multiplex3D(central_muxlist, layer.layout=lay,
                  layer.colors=rainbow(length(central_muxlist)),
                  layer.shift.x=0.5, layer.space=2,
-                 layer.labels=c("Degree", "Betweenness", "Closeness"),    
+                 layer.labels=c("Degree", "Betweenness"),    
                  layer.labels.cex=1.5,
                  node.size.values=node.ab.matrix, node.size.scale=0.8,
                  node.colors=node.colors.matrix, edge.colors="#dadada",
