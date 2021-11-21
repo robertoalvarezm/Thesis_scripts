@@ -125,7 +125,7 @@ legend(x=-2.7, y=-0.3, unq, title = "Plant", pch=21, pt.bg=colors, pt.cex=2, cex
 ```
 Para poder visualizar la abundancia relativa de los nodos en la red, construimos la función g_abundance(), misma que tiene como entrada la matriz de abundancias de la red y un objeto tipo igraph. La función transforma las abundancias absolutas de los datos de entrada en abundancias relativas. Se generar una paleta de colores donde entre mayor sea la abundancia de un nodo, éste se representará con un tono más azulado, mientras que los tonos próximos al amarillo corresponden a nodos con baja abundancia relativa.
 ```{r}
-g_abundance<-function(layer_mat, g){
+g_abundance<-function(layer_mat, g, name){
      #Abundancias absolutas a abundancias relativas
      net_ab<-colSums(layer_mat)
      net_ab<-as.numeric((net_ab)/net_ab[which.max(net_ab)])
