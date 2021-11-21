@@ -202,13 +202,15 @@ insect_sparCC<-TaxGroup(insect_sparCC, T_table, "Phylum", "Genus")
 plant_sparCC<-TaxGroup(plant_sparCC, T_table, "Phylum", "Genus")
 vertex.attributes(insect_sparCC)$Taxon[1:12]
 ```
-Análisis de clusters
+El análisis de clusters se realizó por el método Louvain, mismo que optimiza la modularidad para detetar comunidades de nodos muy interconectados mediante el calculo la densidad de aristas dentro de la red. El grado de clusterización varía entre -1 y 1. Las aristas que conectan los nodos dentro de la comunidad están representados en negro, mientras que aquellas que conectan nodos entre comunidades distintas resaltan en rojo. Para visualizar mejor el gráfico se eliminaron los nodos cuyo degree fuese 0.
 ```{r}
-insect_cluster<-cluster_louvain(insect_sparCC)
-plot(insect_cluster, insect_sparCC, vertex.label.color="black",
+insect_sparCCA<-delete.vertices(insect_sparCC, which(degree(insect_sparCC) == 0))
+insect_cluster<-cluster_louvain(insect_sparCCA)
+plot(insect_cluster, insect_sparCCA, vertex.label.color="black",
      vertex.label.cex=.5,layout=layout_with_kk, vertex.size = 5)
-plant_cluster<-cluster_louvain(plant_sparCC)
-plot(plant_cluster, plant_sparCC, vertex.label.color="black",
+plant_sparCCA<-delete.vertices(plant_sparCC, which(degree(plant_sparCC) == 0))
+plant_cluster<-cluster_louvain(plant_sparCCA)
+plot(plant_cluster, plant_sparCCA, vertex.label.color="black",
      vertex.label.cex=.5,layout=layout_with_kk, vertex.size = 5)
 ```
 Construimos una función que nos permite colorear los nodos en función de su centralidad. El objeto ctr_type puede corresponder a "degree", "betweenness" y "closeness".

@@ -117,14 +117,17 @@ plot_multiplex3D(g.list, layer.layout=lay,
 ```
 Análisis de clusters
 ```{r cache=FALSE, results=FALSE, warning=FALSE, comment=FALSE, writing=FALSE}
-T1_cluster<-cluster_louvain(T1_SparCC)
-plot(T1_cluster, T1_SparCC, vertex.label.color="black",
+T1_SparCCA<-delete.vertices(T1_SparCC, which(degree(T1_SparCC) == 0))
+T1_cluster<-cluster_louvain(T1_SparCCA)
+plot(T1_cluster, T1_SparCCA, vertex.label.color="black",
      vertex.label.cex=.5,layout=layout_with_kk, vertex.size = 5)
-T2_cluster<-cluster_louvain(T2_SparCC)
-plot(T2_cluster, T2_SparCC, vertex.label.color="black",
+T2_SparCCA<-delete.vertices(T2_SparCC, which(degree(T2_SparCC) == 0))
+T2_cluster<-cluster_louvain(T2_SparCCA)
+plot(T2_cluster, T2_SparCCA, vertex.label.color="black",
      vertex.label.cex=.5,layout=layout_with_kk, vertex.size = 5)
-T3_cluster<-cluster_louvain(T3_SparCC)
-plot(T3_cluster, T3_SparCC, vertex.label.color="black",
+T3_SparCCA<-delete.vertices(T3_SparCC, which(degree(T3_SparCC) == 0))
+T3_cluster<-cluster_louvain(T3_SparCCA)
+plot(T3_cluster, T3_SparCCA, vertex.label.color="black",
      vertex.label.cex=.5,layout=layout_with_kk, vertex.size = 5)
 ```
 Visualización de redes individuales en función del degree.

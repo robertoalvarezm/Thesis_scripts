@@ -119,11 +119,13 @@ vertex.attributes(insect_aracne)$Taxon[1:12]
 ```
 Análisis de clusters
 ```{r}
-insect_cluster<-cluster_louvain(insect_aracne)
-plot(insect_cluster, insect_aracne, vertex.label.color="black",
+insect_aracneA<-delete.vertices(insect_aracne, which(degree(insect_aracne) == 0))
+insect_cluster<-cluster_louvain(insect_aracneA)
+plot(insect_cluster, insect_aracneA, vertex.label.color="black",
      vertex.label.cex=.5,layout=layout_with_kk, vertex.size = 5)
-plant_cluster<-cluster_louvain(plant_aracne)
-plot(plant_cluster, plant_aracne, vertex.label.color="black",
+plant_aracneA<-delete.vertices(plant_aracne, which(degree(plant_aracne) == 0))
+plant_cluster<-cluster_louvain(plant_aracneA)
+plot(plant_cluster, plant_aracneA, vertex.label.color="black",
      vertex.label.cex=.5,layout=layout_with_kk, vertex.size = 5)
 ```
 Visualización de redes individuales en función del degree.
