@@ -12,7 +12,3 @@ description: |
 link-citations: yes
 github-repo: rstudio/bookdown-demo
 ---
-
-# Resumen
-##Summary
-##Objetivos

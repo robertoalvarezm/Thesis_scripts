@@ -125,7 +125,7 @@ legend(x=-2.7, y=-0.3, unq, title = "Plant", pch=21, pt.bg=colors, pt.cex=2, cex
 ```
 Para poder visualizar la abundancia relativa de los nodos en la red, construimos la función g_abundance(), misma que tiene como entrada la matriz de abundancias de la red y un objeto tipo igraph. La función transforma las abundancias absolutas de los datos de entrada en abundancias relativas. Se generar una paleta de colores donde entre mayor sea la abundancia de un nodo, éste se representará con un tono más azulado, mientras que los tonos próximos al amarillo corresponden a nodos con baja abundancia relativa.
 ```{r}
-g_abundance<-function(layer_mat, g, name){
+g_abundance<-function(layer_mat, g){
      #Abundancias absolutas a abundancias relativas
      net_ab<-colSums(layer_mat)
      net_ab<-as.numeric((net_ab)/net_ab[which.max(net_ab)])
@@ -216,8 +216,8 @@ plot(plant_cluster, plant_sparCCA, vertex.label.color="black",
 Construimos una función que nos permite colorear los nodos en función de su centralidad. El objeto ctr_type puede corresponder a "degree", "betweenness" y "closeness".
 ```{r}
 ctr<-function(g.list, ctr_type){
+  require(igraph)
   if(ctr_type == "degree"){
-    require(igraph)
     for(i in 1:length(g.list)){
        ctr_max<-which.max(degree(g.list[[i]]))
        ctr<-degree(g.list[[i]])/degree(g.list[[i]])[ctr_max]
@@ -236,7 +236,6 @@ ctr<-function(g.list, ctr_type){
        }
     }
     if(ctr_type == "betweenness"){
-    require(igraph)
     for(i in 1:length(g.list)){
        ctr_max<-which.max(betweenness(g.list[[i]]))
        ctr<-betweenness(g.list[[i]])/betweenness(g.list[[i]])[ctr_max]
@@ -255,7 +254,6 @@ ctr<-function(g.list, ctr_type){
        }
     }
     if(ctr_type == "closeness"){
-    require(igraph)
     for(i in 1:length(g.list)){
        ctr_max<-which.max(closeness(g.list[[i]]))
        ctr<-closeness(g.list[[i]])/closeness(g.list[[i]])[ctr_max]
@@ -274,6 +272,61 @@ ctr<-function(g.list, ctr_type){
        }
    }
    return(g.list)
+}
+```
+Realizamos una función con mismo propósito para redes simples.
+```{r}
+ctr_g<-function(g, ctr_type){
+  require(igraph)
+    for(i in 1:length(g.list)){
+       ctr_max<-which.max(degree(g))
+       ctr<-degree(g)/degree(g)[ctr_max]
+       Redpal<-heat.colors(5, alpha=1)
+       hl1<-which(ctr > 0 & ctr <= 0.2)
+       V(g)[hl1]$hl<-Redpal[5]
+       hl2<-which(ctr > 0.2 & ctr <= 0.4)
+       V(g)[hl2]$hl<-Redpal[4]
+       hl3<-which(ctr > 0.4 & ctr <= 0.6)
+       V(g)[hl3]$hl<-Redpal[3]
+       hl4<-which(ctr > 0.6 & ctr <= 0.8)
+       V(g)[hl4]$hl<-Redpal[2]
+       hl5<-which(ctr > 0.8 & ctr <= 1)
+       V(g)[hl5]$hl<-Redpal[1]
+       vertex.attributes(g)$hl
+  }
+  if(ctr_type == "betweenness"){
+       ctr_max<-which.max(betweenness(g))
+       ctr<-betweenness(g)/betweenness(g)[ctr_max]
+       Redpal<-heat.colors(5, alpha=1)
+       hl1<-which(ctr > 0 & ctr <= 0.2)
+       V(g)[hl1]$hl<-Redpal[5]
+       hl2<-which(ctr > 0.2 & ctr <= 0.4)
+       V(g)[hl2]$hl<-Redpal[4]
+       hl3<-which(ctr > 0.4 & ctr <= 0.6)
+       V(g)[hl3]$hl<-Redpal[3]
+       hl4<-which(ctr > 0.6 & ctr <= 0.8)
+       V(g)[hl4]$hl<-Redpal[2]
+       hl5<-which(ctr > 0.8 & ctr <= 1)
+       V(g)[hl5]$hl<-Redpal[1]
+       vertex.attributes(g)$hl
+  }
+  if(ctr_type == "closeness"){
+       ctr_max<-which.max(closeness(g))
+       ctr<-closeness(g)/closeness(g)[ctr_max]
+       Redpal<-heat.colors(5, alpha=1)
+       hl1<-which(ctr > 0 & ctr <= 0.2)
+       V(g)[hl1]$hl<-Redpal[5]
+       hl2<-which(ctr > 0.2 & ctr <= 0.4)
+       V(g)[hl2]$hl<-Redpal[4]
+       hl3<-which(ctr > 0.4 & ctr <= 0.6)
+       V(g)[hl3]$hl<-Redpal[3]
+       hl4<-which(ctr > 0.6 & ctr <= 0.8)
+       V(g)[hl4]$hl<-Redpal[2]
+       hl5<-which(ctr > 0.8 & ctr <= 1)
+       V(g)[hl5]$hl<-Redpal[1]
+       vertex.attributes(g)$hl
+  }
+  return(g)
 }
 ```
 Visualización de redes individuales en función del degree.
@@ -343,18 +396,18 @@ Generamos redes agregadas para cada tipo de centralidad y las introducimos como 
 net_d<-GetAggregateNetworkFromNetworkList(g.list_d)
 net_bt<-GetAggregateNetworkFromNetworkList(g.list_bt)
 net_cl<-GetAggregateNetworkFromNetworkList(g.list_cl)
+
+d<-ctr_g(net_d, ctr_type = "degree")
+hl_d<-as.vector(vertex.attributes(d)$hl)
+bt<-ctr_g(net_bt, ctr_type = "betweenness")
+hl_bt<-as.vector(vertex.attributes(bt)$hl)
+cl<-ctr_g(net_cl, ctr_type = "closeness")
+hl_cl<-as.vector(vertex.attributes(cl)$hl)
+
 central_muxlist<-list(net_d, net_bt, net_cl)
-
-d<-ctr(central_muxlist, ctr_type = "degree")
-hl_d<-as.vector(vertex.attributes(d[[1]])$hl)
-bt<-ctr(central_muxlist, ctr_type = "betweenness")
-hl_bt<-as.vector(vertex.attributes(bt[[2]])$hl)
-cl<-ctr(central_muxlist, ctr_type = "closeness")
-hl_cl<-as.vector(vertex.attributes(cl[[3]])$hl)
-
-hl_colors2<-c(hl_d, hl_bt, hl_cl)
 Nodes<-length(V(central_muxlist[[1]]))
 Layers<-length(central_muxlist)
+hl_colors2<-c(hl_d, hl_bt, hl_cl)
 node.colors.matrix <- matrix(hl_colors2, Nodes, Layers)
 ```
 Se genera una matriz de abundancias.
@@ -362,8 +415,6 @@ Se genera una matriz de abundancias.
 collapsed_ab<-colSums(T_Collapsed)
 collapsed_ab<-as.numeric(collapsed_ab/collapsed_ab[which.max(collapsed_ab)])
 collapsed_ab<-c(collapsed_ab, collapsed_ab, collapsed_ab)
-Nodes<-length(V(central_muxlist[[1]]))
-Layers<-length(central_muxlist)
 node.ab.matrix <- matrix((collapsed_ab+1)*10, Nodes, Layers)
 ```
 Construímos un gráfico 3D representando los tres tipos de centralidad en un gradiente de color y el tamaño de los nodos en función de las abundancias.
