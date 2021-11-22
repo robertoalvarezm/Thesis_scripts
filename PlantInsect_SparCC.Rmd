@@ -564,4 +564,3 @@ d2<-which(colMeans(Insectmat[,diff]) < colMeans(Plantmat[,diff])); names(d2)
 vertex.attributes(diff_g)$Taxon[diff][d2]
 ```
 
-
