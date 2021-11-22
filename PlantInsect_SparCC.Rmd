@@ -439,11 +439,11 @@ nodos con centralidad alta.
 Redpal<-heat.colors(5, alpha=1)
 #Se localizan los nodos con mayor centralidad, correspondientes al rojo intenso
 #de los gráficos previos, y se asocian al phylum al que pertenecen.
-by_degree<-which(vertex.attributes(d[[1]])$hl == Redpal[1])
+by_degree<-which(vertex.attributes(d)$hl == Redpal[1])
 vertex.attributes(insect_sparCC)$Taxon[by_degree]
-by_betweenness<-which(vertex.attributes(bt[[1]])$hl == Redpal[1])
+by_betweenness<-which(vertex.attributes(bt)$hl == Redpal[1])
 vertex.attributes(insect_sparCC)$Taxon[by_betweenness]
-by_closeness<-which(vertex.attributes(cl[[1]])$hl == Redpal[1])
+by_closeness<-which(vertex.attributes(cl)$hl == Redpal[1])
 vertex.attributes(insect_sparCC)$Taxon[by_closeness]
 ```
 Posteriormente generamos un diagrama de cuerda para poder visualizar la
