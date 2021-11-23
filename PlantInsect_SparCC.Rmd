@@ -79,6 +79,50 @@ plant_sparCC<-adj2igraph(sparccNet)
 vertex.attributes(plant_sparCC) <- list(name = colnames(Plantmat))
 plot_network(plant_sparCC)
 ```
+Distribución del degree
+```{r cache=FALSE, results=FALSE, warning=FALSE, comment=FALSE, writing=FALSE}
+par(mfrow=c(1,2))
+
+# Calculamos la densidad
+dx1 <- density(degree(insect_sparCC), bw = 1)
+dx2 <- density(degree(plant_sparCC), bw = 1)
+
+# Creamos los histogramas con sus respectivas curvas de densidad y ruido asociado en el eje x.
+hist(degree(insect_sparCC), freq = FALSE, main = "Insect", ylab = "Density",
+     col = "khaki")
+lines(dx1, lwd = 2, col = "red")
+rug(jitter(degree(insect_sparCC)))
+
+hist(degree(plant_sparCC), freq = FALSE, main = "Plant", ylab = "Density",
+     col = "khaki")
+lines(dx2, lwd = 2, col = "blue")
+rug(jitter(degree(plant_sparCC)))
+
+par(mfrow=c(1,1))
+```
+Comparación de la distribución del degree entre capas y análisis de normalidad.
+```{r cache=FALSE, results=FALSE, warning=FALSE, comment=FALSE, writing=FALSE}
+# Aumentamos la resolución para visualizar mejor las diferencias
+dx1 <- density(degree(insect_sparCC), bw = 0.1)
+dx2 <- density(degree(plant_sparCC), bw = 0.1)
+
+# Graficamos las densidades
+plot(dx1, lwd = 2, main = "Degree dendities", xlab = "",
+     col = "red", xlim = c(-4, 6), ylim = c(0, 0.5))
+rug(jitter(degree(insect_sparCC)), col = "red")
+
+lines(dx2, lwd = 2, col = "blue")
+rug(jitter(degree(plant_sparCC)), col = "blue")
+
+Groups<-c("Insect", "Plant")
+legend("topleft", Groups, col = c("Red", "Blue"), lty = 1) 
+
+# Normalidad y resumen estadístico
+shapiro.test(degree(insect_sparCC))
+summary(degree(insect_sparCC))
+shapiro.test(degree(plant_sparCC))
+summary(degree(plant_sparCC))
+```
 En la función v_colored() se identifican los elementos únicos del nivel taxonómico de mayor jerarquía y se genera una paleta de colores con un color asociado a cada elemento.En el ciclo for se obtienen los números de identificación asociados a cada uno de los elementos de unq, para posteriormente asignarles un color dentro del grafo.
 ```{r}
 v_colored<-function(g, T_table, g_tax, p_tax, g_colors){
@@ -453,13 +497,11 @@ programamos para obtener un data.frame a nivel de phylum. Posteriormente
 buscamos los identificadores de las muestras y sumamos las abundancias de cada
 uno de los phylum dentro de las muestras.
 ```{r eval = FALSE}
-library(circlize)
-#Identificadores de las muestras.
+# Identificadores de las muestras.
 samples<-unique(sample_data(ps2)$Samples)
-#Generación de tabla de abundancias a nivel de phylum.
+# Generación de tabla de abundancias a nivel de phylum.
 phylum_table<-T_collapse(T_table, O_table, "Phylum"); dim(phylum_table)
-#Se genera un data.frame que contiene la suma de las abundancias de los phyla
-#en cada una de las muestras.
+# Se genera un data.frame que contiene la suma de las abundancias de los phyla en cada muestra.
 data_frs<-list()
 for(i in 1:length(samples)){
   s_data<-which(sample_data(ps2)$Samples == samples[i]); s_data
@@ -468,10 +510,15 @@ for(i in 1:length(samples)){
   data_frs[[i]]<-data.frame("ID"=samples[i],"Taxa"=bacter_names, "Sums"=ab_sums)
 }
 length(samples)
+
+# Se construye el data.frame
 chord_df<-rbind.data.frame(data_frs[[1]], data_frs[[2]], data_frs[[3]],
-                 data_frs[[4]], data_frs[[5]], data_frs[[6]])
-#Se eliminan las filas donde la abundancia sea nula.
+                           data_frs[[4]], data_frs[[5]], data_frs[[6]])
+# Se eliminan las filas donde la abundancia sea nula.
 chord_df<-chord_df[-which(chord_df$Sums == 0),]
+
+# Realizamos un gráfico de barras apiladas con ggplot
+
 ```
 Generación del diagrama de cuerda. En la imagen podemos apresiar el peso que el
 phylum Proteobacteria tiene en las muestras, pues se muestra como preponderante
@@ -481,6 +528,7 @@ Actinobacteria y Bacteroidetes.
 La función circos.trackPlotRegion() modificada, se tomó de:
 https://bioinfo4all.wordpress.com/2021/03/13/tutorial-7-how-to-do-chord-diagram-using-r/
 ```{r eval = False}
+library(circlize)
 #Se genera un chord_diagram con las leyendas suprimidas.
 chordDiagram(chord_df, annotationTrack = "grid", preAllocateTracks = 1)
 #Para evitar que los nombres se amontonen, se carga la función
@@ -499,6 +547,35 @@ circos.trackPlotRegion(track.index = 2, panel.fun = function(x, y) {
               sector.index = sector.name, track.index = 2)
 }, bg.border = NA)
 circos.trackPlotRegion(chord_df)
+```
+También podemos visualizar la distribución en las muestras mediante ggplot
+```{r}
+# Identificadores de las muestras
+samples<-unique(sample_data(ps2)$Samples)
+# Generación de tabla de abundancias a nivel de phylum
+phylum_table<-T_collapse(T_table = T_table, O_table = O_table,
+                        names_level = "Phylum")
+# Se genera un data.frame que contiene la suma de las abundancias de los phyla en cada muestra
+data_frs<-list()
+for(i in 1:length(samples)){
+  s_data<-which(sample_data(ps2)$Samples == samples[i]); s_data
+  bacter_names<-colnames(phylum_table[s_data,])
+  ab_sums<-colSums(phylum_table[s_data,])
+  data_frs[[i]]<-data.frame("Taxa"=bacter_names, "Sums"=ab_sums, "ID"=samples[i])
+}
+ab_df<-data_frs[[1]]
+# Construímos el data.frame
+for(i in 2:length(data_frs)){
+  ab_df<-rbind.data.frame(ab_df, data_frs[[i]])
+}
+# Se eliminan los phylum cuya abundancia en las muestras sea 0
+ab_df<-ab_df[-which(ab_df$Sums == 0),]
+
+# Construímos un gráfico de barras apiladas de las abundancias en las muestras
+library(ggplot2)
+ggplot(ab_df)+
+  geom_col(mapping = aes(x = ID, y = Sums, fill = Taxa), position = "fill", show.legend = TRUE)+
+  ylab("Proportion of Community")
 ```
 Para identificar aquellos nodos que cambian entre capas y diferenciarlos de aquellos
 que permanecen sin diferencias significativas, construimos una función que aplique

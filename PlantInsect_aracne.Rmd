@@ -55,6 +55,50 @@ plant_aracne<-graph.adjacency(PlantmatA)
 plant_aracne<-as.undirected(plant_aracne)
 plot_network(plant_aracne)
 ```
+Distribución del degree
+```{r cache=FALSE, results=FALSE, warning=FALSE, comment=FALSE, writing=FALSE}
+par(mfrow=c(1,2))
+
+# Calculamos la densidad
+dx1 <- density(degree(insect_aracne), bw = 1)
+dx2 <- density(degree(plant_aracne), bw = 1)
+
+# Creamos los histogramas con sus respectivas curvas de densidad y ruido asociado en el eje x.
+hist(degree(insect_aracne), freq = FALSE, main = "Insect", ylab = "Density",
+     col = "khaki")
+lines(dx1, lwd = 2, col = "red")
+rug(jitter(degree(insect_aracne)))
+
+hist(degree(plant_aracne), freq = FALSE, main = "Plant", ylab = "Density",
+     col = "khaki")
+lines(dx2, lwd = 2, col = "blue")
+rug(jitter(degree(plant_aracne)))
+
+par(mfrow=c(1,1))
+```
+Comparación de la distribución del degree entre capas y análisis de normalidad.
+```{r cache=FALSE, results=FALSE, warning=FALSE, comment=FALSE, writing=FALSE}
+# Aumentamos la resolución para visualizar mejor las diferencias
+dx1 <- density(degree(insect_aracne), bw = 0.1)
+dx2 <- density(degree(plant_aracne), bw = 0.1)
+
+# Graficamos las densidades
+plot(dx1, lwd = 2, main = "Degree dendities", xlab = "",
+     col = "red", xlim = c(-4, 6), ylim = c(0, 0.5))
+rug(jitter(degree(insect_aracne)), col = "red")
+
+lines(dx2, lwd = 2, col = "blue")
+rug(jitter(degree(plant_aracne)), col = "blue")
+
+Groups<-c("Insect", "Plant")
+legend("topleft", Groups, col = c("Red", "Blue"), lty = 1) 
+
+# Normalidad y resumen estadístico
+shapiro.test(degree(insect_aracne))
+summary(degree(insect_aracne))
+shapiro.test(degree(plant_aracne))
+summary(degree(plant_aracne))
+```
 Se colorean las redes a nivel de phylum usando la función v_colored()
 ```{r}
 unq<-unique(T_table[,"Phylum"])

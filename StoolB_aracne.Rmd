@@ -50,6 +50,62 @@ T3_aracne<-graph.adjacency(T_matC)
 T3_aracne<-as.undirected(T3_aracne)
 plot_network(T3_aracne)
 ```
+Distribución del degree
+```{r cache=FALSE, results=FALSE, warning=FALSE, comment=FALSE, writing=FALSE}
+par(mfrow=c(1,3))
+
+# Calculamos la densidad
+dx1 <- density(degree(T1_aracne), bw = 1)
+dx2 <- density(degree(T2_aracne), bw = 1)
+dx3 <- density(degree(T3_aracne), bw = 1)
+
+# Creamos los histogramas con sus respectivas curvas de densidad y ruido asociado en el eje x.
+hist(degree(T1_aracne), freq = FALSE, main = "Before travel", ylab = "Density",
+     col = "khaki")
+lines(dx1, lwd = 2, col = "red")
+rug(jitter(degree(T1_aracne)))
+
+hist(degree(T2_aracne), freq = FALSE, main = "During travel", ylab = "Density",
+     col = "khaki")
+lines(dx2, lwd = 2, col = "blue")
+rug(jitter(degree(T2_aracne)))
+
+hist(degree(T3_aracne), freq = FALSE, main = "After travel", ylab = "Density",
+     col = "khaki")
+lines(dx3, lwd = 2, col = "green")
+rug(jitter(degree(T2_aracne)))
+
+par(mfrow=c(1,1))
+```
+Comparación de la distribución del degree entre capas y análisis de normalidad.
+```{r cache=FALSE, results=FALSE, warning=FALSE, comment=FALSE, writing=FALSE}
+# Aumentamos la resolución para distinguir major las diferencias
+dx1 <- density(degree(T1_SparCC), bw = 0.1)
+dx2 <- density(degree(T2_SparCC), bw = 0.1)
+dx3 <- density(degree(T3_SparCC), bw = 0.1)
+
+# Graficamos las densidades
+plot(dx1, lwd = 2, main = "Degree dendities", xlab = "",
+     col = "red", xlim = c(-4, 6), ylim = c(0, 0.5))
+rug(jitter(degree(T1_SparCC)), col = "red")
+
+lines(dx2, lwd = 2, col = "blue")
+rug(jitter(degree(T2_SparCC)), col = "blue")
+
+lines(dx3, lwd = 2, col = "green")
+rug(jitter(degree(T3_SparCC)), col = "green")
+
+Grupos<-c("Before travel", "During travel", "After travel")
+legend("topleft", Grupos, col = c("Red", "Blue", "Green"), lty = 1) 
+
+# Normalidad y resumen estadístico
+shapiro.test(degree(T1_aracne))
+summary(degree(T1_aracne))
+shapiro.test(degree(T2_aracne))
+summary(degree(T2_aracne))
+shapiro.test(degree(T3_aracne))
+summary(degree(T3_aracne))
+```
 Se colorean las redes a nivel de phylum usando la función v_colored()
 ```{r echo=FALSE, cache=FALSE, results=FALSE, warning=FALSE, comment=FALSE, writing=FALSE}
 unq<-unique(T_table[,"V3"])
