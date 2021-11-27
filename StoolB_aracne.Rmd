@@ -60,17 +60,17 @@ dx2 <- density(degree(T2_aracne), bw = 1)
 dx3 <- density(degree(T3_aracne), bw = 1)
 
 # Creamos los histogramas con sus respectivas curvas de densidad y ruido asociado en el eje x.
-hist(degree(T1_aracne), freq = FALSE, main = "Before travel", ylab = "Density",
+hist(degree(T1_aracne), freq = FALSE, main = "Before infection", ylab = "Density",
      col = "khaki")
 lines(dx1, lwd = 2, col = "red")
 rug(jitter(degree(T1_aracne)))
 
-hist(degree(T2_aracne), freq = FALSE, main = "During travel", ylab = "Density",
+hist(degree(T2_aracne), freq = FALSE, main = "During infection", ylab = "Density",
      col = "khaki")
 lines(dx2, lwd = 2, col = "blue")
 rug(jitter(degree(T2_aracne)))
 
-hist(degree(T3_aracne), freq = FALSE, main = "After travel", ylab = "Density",
+hist(degree(T3_aracne), freq = FALSE, main = "After infection", ylab = "Density",
      col = "khaki")
 lines(dx3, lwd = 2, col = "green")
 rug(jitter(degree(T2_aracne)))
@@ -80,22 +80,22 @@ par(mfrow=c(1,1))
 Comparación de la distribución del degree entre capas y análisis de normalidad.
 ```{r cache=FALSE, results=FALSE, warning=FALSE, comment=FALSE, writing=FALSE}
 # Aumentamos la resolución para distinguir major las diferencias
-dx1 <- density(degree(T1_SparCC), bw = 0.1)
-dx2 <- density(degree(T2_SparCC), bw = 0.1)
-dx3 <- density(degree(T3_SparCC), bw = 0.1)
+dx1 <- density(degree(T1_aracne), bw = 0.1)
+dx2 <- density(degree(T2_aracne), bw = 0.1)
+dx3 <- density(degree(T3_aracne), bw = 0.1)
 
 # Graficamos las densidades
 plot(dx1, lwd = 2, main = "Degree dendities", xlab = "",
      col = "red", xlim = c(-4, 6), ylim = c(0, 0.5))
-rug(jitter(degree(T1_SparCC)), col = "red")
+rug(jitter(degree(T1_aracne)), col = "red")
 
 lines(dx2, lwd = 2, col = "blue")
-rug(jitter(degree(T2_SparCC)), col = "blue")
+rug(jitter(degree(T2_aracne)), col = "blue")
 
 lines(dx3, lwd = 2, col = "green")
-rug(jitter(degree(T3_SparCC)), col = "green")
+rug(jitter(degree(T3_aracne)), col = "green")
 
-Grupos<-c("Before travel", "During travel", "After travel")
+Grupos<-c("Before infection", "During infection", "After infection")
 legend("topleft", Grupos, col = c("Red", "Blue", "Green"), lty = 1) 
 
 # Normalidad y resumen estadístico
@@ -177,6 +177,28 @@ plot_multiplex3D(g.list, layer.layout=lay,
                  node.colors.aggr=vertex.attributes(T1_aracne)$color,
                  show.aggregate=T)
 ```
+También podemos visualizar la distribución en las muestras mediante ggplot
+```{r}
+phylum_table<-T_collapse(T_table, O_table, "V3")
+T1_samples<-phylum_table[1:150,]
+T2_samples<-phylum_table[151:159,]
+T3_samples<-phylum_table[160:dim(phylum_table)[1],]
+ab_T1<-colSums(T1_samples)
+ab_T2<-colSums(T2_samples)
+ab_T3<-colSums(T3_samples)
+data_frs1<-data.frame("Taxa"=colnames(T1_samples), "Sums"=ab_T1,
+                      "ID"=rep("Before infection", length(ab_T1)))
+data_frs2<-data.frame("Taxa"=colnames(T2_samples), "Sums"=ab_T2,
+                      "ID"=rep("During infection", length(ab_T2)))
+data_frs3<-data.frame("Taxa"=colnames(T3_samples), "Sums"=ab_T3,
+                      "ID"=rep("After infection", length(ab_T3)))
+ggplot_df<-rbind(data_frs1, data_frs2, data_frs3)
+ggplot_df<-ggplot_df[-which(ggplot_df$Sums < 100),]
+library(ggplot2)
+ggplot(ggplot_df)+
+  geom_col(mapping = aes(x = ID, y = Sums, fill = Taxa), position = "fill", show.legend = TRUE)+
+  ylab("Proportion of Community")
+```
 Análisis de clusters
 ```{r cache=FALSE, results=FALSE, warning=FALSE, comment=FALSE, writing=FALSE}
 T1_aracneA<-delete.vertices(T1_aracne, which(degree(T1_aracne) == 0))
@@ -224,7 +246,7 @@ lay <- layoutMultiplex(g.list_d, layout="fr", ggplot.format=F, box=T)
 plot_multiplex3D(g.list_d, layer.layout=lay,
                  layer.colors=rainbow(length(g.list_d)),
                  layer.shift.x=0.5, layer.space=2,
-                 layer.labels=c("Before travel", "During travel", "After travel"),
+                 layer.labels=c("Before infection", "During infection", "After infection"),
                  layer.labels.cex=1.5, node.size.values="auto",
                  node.size.scale=0.8, node.colors=node.colors.matrix,
                  edge.colors="#dadada", show.aggregate=F)
@@ -243,7 +265,7 @@ lay <- layoutMultiplex(g.list_bt, layout="fr", ggplot.format=F, box=T)
 plot_multiplex3D(g.list_bt, layer.layout=lay,
                  layer.colors=rainbow(length(g.list_bt)),
                  layer.shift.x=0.5, layer.space=2,
-                 layer.labels=c("Before travel", "During travel", "After travel"),
+                 layer.labels=c("Before infection", "During infection", "After infection"),
                  layer.labels.cex=1.5, node.size.values="auto",
                  node.size.scale=0.8, node.colors=node.colors.matrix,
                  edge.colors="#dadada", show.aggregate=F)

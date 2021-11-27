@@ -27,7 +27,7 @@ dim(T_Collapsed)
 
 T1_mat <- T_Collapsed[1:70,]
 T2_mat <- T_Collapsed[71:122,]
-T3_mat <- T_Collapsed[122:dim(T_Collapsed)[1],]
+T3_mat <- T_Collapsed[123:dim(T_Collapsed)[1],]
 ```
 Construímos la red correspondiente a los datos de abundancias de OTUs observadas en cada uno de los periodos utilizando el algoritmo de inferencia ARACNe
 ```{r cache=FALSE, results=FALSE, warning=FALSE, comment=FALSE, writing=FALSE}
@@ -177,6 +177,28 @@ plot_multiplex3D(g.list, layer.layout=lay,
                  node.colors.aggr=vertex.attributes(T1_aracne)$color,
                  show.aggregate=T)
 ```
+También podemos visualizar la distribución en las muestras mediante ggplot
+```{r}
+phylum_table<-T_collapse(T_table, O_table, "V3")
+T1_samples<-phylum_table[1:70,]
+T2_samples<-phylum_table[71:122,]
+T3_samples<-phylum_table[123:dim(phylum_table)[1],]
+ab_T1<-colSums(T1_samples)
+ab_T2<-colSums(T2_samples)
+ab_T3<-colSums(T3_samples)
+data_frs1<-data.frame("Taxa"=colnames(T1_samples), "Sums"=ab_T1,
+                      "ID"=rep("Before travel", length(ab_T1)))
+data_frs2<-data.frame("Taxa"=colnames(T2_samples), "Sums"=ab_T2,
+                      "ID"=rep("During travel", length(ab_T2)))
+data_frs3<-data.frame("Taxa"=colnames(T3_samples), "Sums"=ab_T3,
+                      "ID"=rep("After travel", length(ab_T3)))
+ggplot_df<-rbind(data_frs1, data_frs2, data_frs3)
+ggplot_df<-ggplot_df[-which(ggplot_df$Sums < 300),]
+library(ggplot2)
+ggplot(ggplot_df)+
+  geom_col(mapping = aes(x = ID, y = Sums, fill = Taxa), position = "fill", show.legend = TRUE)+
+  ylab("Proportion of Community")
+```
 Análisis de clusters
 ```{r cache=FALSE, results=FALSE, warning=FALSE, comment=FALSE, writing=FALSE}
 T1_aracneA<-delete.vertices(T1_aracne, which(degree(T1_aracne) == 0))
@@ -322,5 +344,41 @@ plot(diff_g, vertex.label.color="black", vertex.color = vertex.attributes(diff_g
 ```
 Construcción de redes temporales con el paquete multinet
 ```{r}
+#Multilayer network
+library(multinet)
+#Se genera una red multicapa con coordenadas "x", "y" y "z".
+ml_net<-ml_empty()
+l <- layout_circular_ml(ml_net)
+#Se agregan las capas a partir de redes igraph.
+add_igraph_layer_ml(ml_net, T1_aracne, "Before travel")
+add_igraph_layer_ml(ml_net, T2_aracne, "During travel")
+add_igraph_layer_ml(ml_net, T3_aracne, "After travel")
 
+ml_clust <- glouvain_ml(ml_net)
+l <- layout_multiforce_ml(ml_net)
+plot(ml_net,
+     com = ml_clust,
+     vertex.labels = "",
+     layout=l, grid = c(1,3),
+)
+```
+
+```{r}
+clust<-list()
+for(i in 1:length(unique(ml_clust$cid))){
+  clust[[i]]<-which(unique(ml_clust$cid)[i] == ml_clust$cid)
+}
+clust2<-list()
+for(i in 1:length(clust)){
+  if(length(clust[[i]])>9){
+  clust2[[i]]<-clust[i]
+  }
+}
+clust2
+```
+
+```{r}
+net_times<-list()
+net_times[2] <- erdos.renyi.game(10, 0.3)
+net_times
 ```

@@ -20,7 +20,7 @@ dim(T_Collapsed)
 
 T1_mat <- T_Collapsed[1:70,]
 T2_mat <- T_Collapsed[71:122,]
-T3_mat <- T_Collapsed[122:dim(T_Collapsed)[1],]
+T3_mat <- T_Collapsed[123:dim(T_Collapsed)[1],]
 ```
 Inferimos las redes mediante el algoritmo SparCC.
 ```{r}
