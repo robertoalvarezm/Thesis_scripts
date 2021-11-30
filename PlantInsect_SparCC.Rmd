@@ -576,6 +576,10 @@ library(ggplot2)
 ggplot(ab_df)+
   geom_col(mapping = aes(x = ID, y = Sums, fill = Taxa), position = "fill", show.legend = TRUE)+
   ylab("Proportion of Community")
+
+# Graficamos la diversidad de las muestras.
+plot_richness(ps2, x = "Samples", color = "Specie", measures = c("Observed", "Chao1",
+             "Shannon", "Simpson")) + geom_boxplot()
 ```
 Para identificar aquellos nodos que cambian entre capas y diferenciarlos de aquellos
 que permanecen sin diferencias significativas, construimos una función que aplique
