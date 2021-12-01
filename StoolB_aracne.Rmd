@@ -1,6 +1,6 @@
 # Temporal StoolB_ARACNe {-}
 
-Se cargan los datos del sujeto A almacenados en el paquete seqtime. Graficamos la variación de las abundancias de los OTUs más relevantes con respecto al tiempo como una serie temporal.
+Se cargan los datos del sujeto B almacenados en el paquete seqtime. Graficamos la variación de las abundancias de los OTUs más relevantes con respecto al tiempo como una serie temporal.
 ```{r}
 library(seqtime)
 library(igraph)

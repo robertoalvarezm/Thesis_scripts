@@ -193,7 +193,7 @@ data_frs2<-data.frame("Taxa"=colnames(T2_samples), "Sums"=ab_T2,
 data_frs3<-data.frame("Taxa"=colnames(T3_samples), "Sums"=ab_T3,
                       "ID"=rep("After travel", length(ab_T3)))
 ggplot_df<-rbind(data_frs1, data_frs2, data_frs3)
-ggplot_df<-ggplot_df[-which(ggplot_df$Sums < 300),]
+ggplot_df<-ggplot_df[-which(ggplot_df$Sums < 200),]
 library(ggplot2)
 ggplot(ggplot_df)+
   geom_col(mapping = aes(x = ID, y = Sums, fill = Taxa), position = "fill", show.legend = TRUE)+
@@ -212,6 +212,13 @@ boxplot(Shannon1, Shannon2, Shannon3, names = c("Time I", "Time II", "Time III")
 boxplot(Simpson1, Simpson2, Simpson3, names = c("Time I", "Time II", "Time III"),
         col = "Blue", main = "Simpson")
 par(mfrow = c(1,1))
+
+shapiro.test(Shannon1)
+shapiro.test(Shannon2)
+shapiro.test(Shannon3)
+shapiro.test(Simpson1)
+shapiro.test(Shannon2)
+shapiro.test(Shannon3)
 ```
 Análisis de clusters
 ```{r cache=FALSE, results=FALSE, warning=FALSE, comment=FALSE, writing=FALSE}
