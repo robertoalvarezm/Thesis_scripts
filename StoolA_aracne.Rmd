@@ -198,6 +198,20 @@ library(ggplot2)
 ggplot(ggplot_df)+
   geom_col(mapping = aes(x = ID, y = Sums, fill = Taxa), position = "fill", show.legend = TRUE)+
   ylab("Proportion of Community")
+
+# Cálculo de la diversidad Shannon y Simpson
+par(mfrow = c(1,2))
+Shannon1<-diversity(T1_mat, index = "shannon", MARGIN = 1, base = exp(1))
+Shannon2<-diversity(T2_mat, index = "shannon", MARGIN = 1, base = exp(1))
+Shannon3<-diversity(T3_mat, index = "shannon", MARGIN = 1, base = exp(1))
+Simpson1<-diversity(T1_mat, index = "simpson")
+Simpson2<-diversity(T2_mat, index = "simpson")
+Simpson3<-diversity(T3_mat, index = "simpson")
+boxplot(Shannon1, Shannon2, Shannon3, names = c("Time I", "Time II", "Time III"),
+        col = "Green", main = "Shannon")
+boxplot(Simpson1, Simpson2, Simpson3, names = c("Time I", "Time II", "Time III"),
+        col = "Blue", main = "Simpson")
+par(mfrow = c(1,1))
 ```
 Análisis de clusters
 ```{r cache=FALSE, results=FALSE, warning=FALSE, comment=FALSE, writing=FALSE}
@@ -362,23 +376,30 @@ plot(ml_net,
      layout=l, grid = c(1,3),
 )
 ```
-
+Analizamos la correlación de los nodos, el degree y las conexiones entre las capas.
 ```{r}
-clust<-list()
-for(i in 1:length(unique(ml_clust$cid))){
-  clust[[i]]<-which(unique(ml_clust$cid)[i] == ml_clust$cid)
-}
-clust2<-list()
-for(i in 1:length(clust)){
-  if(length(clust[[i]])>9){
-  clust2[[i]]<-clust[i]
-  }
-}
-clust2
+library(corrplot)
+par(mfrow = c(1,3))
+# Como era de esperarse, al conservarse los nodos entre las capas la correlación es total.
+comp <- layer_comparison_ml(ml_net, method = "jaccard.actors")
+comp2<-as.matrix(comp)
+corrplot(comp2)
+# Correlación cercana a cero al comparar el degree de los nodos réplica entre capas.
+comp <- layer_comparison_ml(ml_net, method = "pearson.degree")
+comp2<-as.matrix(comp)
+corrplot(comp2)
+# No hay una correlación significativa de las conexiones de los nodos réplica entre capas.
+comp <- layer_comparison_ml(ml_net, method = "jaccard.edges")
+comp2<-as.matrix(comp)
+corrplot(comp2)
+
+par(mfrow = c(1,1))
+
+# Analizamos la distribución del degree de la red multicapa.
+ml_dx <- density(degree_ml(ml_net), bw = 0.5)
+hist(degree_ml(ml_net), freq = FALSE, main = "Multilayer degree", ylab = "Density",
+     xlab = "Multilayer degree", col = "skyblue")
+lines(ml_dx, lwd = 2, col = "red")
+rug(jitter(degree_ml(ml_net)))
 ```
 
-```{r}
-net_times<-list()
-net_times[2] <- erdos.renyi.game(10, 0.3)
-net_times
-```

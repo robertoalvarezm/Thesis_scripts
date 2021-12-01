@@ -578,7 +578,7 @@ ggplot(ab_df)+
   ylab("Proportion of Community")
 
 # Graficamos la diversidad de las muestras.
-plot_richness(ps2, x = "Samples", color = "Specie", measures = c("Observed", "Chao1",
+plot_richness(ps2, x = "Samples", color = "Specie", measures = c("Observed",
              "Shannon", "Simpson")) + geom_boxplot()
 ```
 Para identificar aquellos nodos que cambian entre capas y diferenciarlos de aquellos
