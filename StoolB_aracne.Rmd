@@ -198,6 +198,30 @@ library(ggplot2)
 ggplot(ggplot_df)+
   geom_col(mapping = aes(x = ID, y = Sums, fill = Taxa), position = "fill", show.legend = TRUE)+
   ylab("Proportion of Community")
+
+# Cálculo de la diversidad Shannon y Simpson
+par(mfrow = c(1,2))
+Shannon1<-diversity(T1_mat, index = "shannon", MARGIN = 1, base = exp(1))
+Shannon1<-Shannon1/log(length(colnames(T_Collapsed)), exp(1))
+Shannon2<-diversity(T2_mat, index = "shannon", MARGIN = 1, base = exp(1))
+Shannon2<-Shannon2/log(length(colnames(T_Collapsed)), exp(1))
+Shannon3<-diversity(T3_mat, index = "shannon", MARGIN = 1, base = exp(1))
+Shannon3<-Shannon3/log(length(colnames(T_Collapsed)), exp(1))
+Simpson1<-diversity(T1_mat, index = "simpson")
+Simpson2<-diversity(T2_mat, index = "simpson")
+Simpson3<-diversity(T3_mat, index = "simpson")
+boxplot(Shannon1, Shannon2, Shannon3, names = c("Time I", "Time II", "Time III"),
+        col = "Green", main = "Shannon")
+boxplot(Simpson1, Simpson2, Simpson3, names = c("Time I", "Time II", "Time III"),
+        col = "Blue", main = "Simpson")
+par(mfrow = c(1,1))
+# Normalidad de la distribución
+shapiro.test(Shannon1)
+shapiro.test(Shannon2)
+shapiro.test(Shannon3)
+shapiro.test(Simpson1)
+shapiro.test(Shannon2)
+shapiro.test(Shannon3)
 ```
 Análisis de clusters
 ```{r cache=FALSE, results=FALSE, warning=FALSE, comment=FALSE, writing=FALSE}

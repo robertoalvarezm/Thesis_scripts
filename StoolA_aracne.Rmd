@@ -202,8 +202,11 @@ ggplot(ggplot_df)+
 # Cálculo de la diversidad Shannon y Simpson
 par(mfrow = c(1,2))
 Shannon1<-diversity(T1_mat, index = "shannon", MARGIN = 1, base = exp(1))
+Shannon1<-Shannon1/log(length(colnames(T_Collapsed)), exp(1))
 Shannon2<-diversity(T2_mat, index = "shannon", MARGIN = 1, base = exp(1))
+Shannon2<-Shannon2/log(length(colnames(T_Collapsed)), exp(1))
 Shannon3<-diversity(T3_mat, index = "shannon", MARGIN = 1, base = exp(1))
+Shannon3<-Shannon3/log(length(colnames(T_Collapsed)), exp(1))
 Simpson1<-diversity(T1_mat, index = "simpson")
 Simpson2<-diversity(T2_mat, index = "simpson")
 Simpson3<-diversity(T3_mat, index = "simpson")
@@ -212,7 +215,7 @@ boxplot(Shannon1, Shannon2, Shannon3, names = c("Time I", "Time II", "Time III")
 boxplot(Simpson1, Simpson2, Simpson3, names = c("Time I", "Time II", "Time III"),
         col = "Blue", main = "Simpson")
 par(mfrow = c(1,1))
-
+# Normalidad de la distribución
 shapiro.test(Shannon1)
 shapiro.test(Shannon2)
 shapiro.test(Shannon3)
@@ -220,7 +223,7 @@ shapiro.test(Simpson1)
 shapiro.test(Shannon2)
 shapiro.test(Shannon3)
 ```
-Análisis de clusters
+Análisis de clusters con algoritmo Louvain
 ```{r cache=FALSE, results=FALSE, warning=FALSE, comment=FALSE, writing=FALSE}
 T1_aracneA<-delete.vertices(T1_aracne, which(degree(T1_aracne) == 0))
 T1_cluster<-cluster_louvain(T1_aracneA)
@@ -234,6 +237,66 @@ T3_aracneA<-delete.vertices(T3_aracne, which(degree(T3_aracne) == 0))
 T3_cluster<-cluster_louvain(T3_aracneA)
 plot(T3_cluster, T3_aracneA, vertex.label.color="black",
      vertex.label.cex=.5,layout=layout_with_kk, vertex.size = 5)
+# Similaridad de clusterización entre capas
+T1_cluster<-cluster_louvain(T1_aracne)
+T2_cluster<-cluster_louvain(T2_aracne)
+T3_cluster<-cluster_louvain(T3_aracne)
+compare(T1_cluster, T2_cluster, method = "rand")
+compare(T2_cluster, T3_cluster, method = "rand")
+compare(T1_cluster, T3_cluster, method = "rand")
+compare(T1_cluster, T2_cluster, method = "nmi")
+compare(T2_cluster, T3_cluster, method = "nmi")
+compare(T1_cluster, T3_cluster, method = "nmi")
+```
+Análisis de clusters con algoritmo optimal
+```{r cache=FALSE, results=FALSE, warning=FALSE, comment=FALSE, writing=FALSE}
+T1_aracneA<-delete.vertices(T1_aracne, which(degree(T1_aracne) == 0))
+T1_cluster<-cluster_optimal(T1_aracneA)
+plot(T1_cluster, T1_aracneA, vertex.label.color="black",
+     vertex.label.cex=.5,layout=layout_with_kk, vertex.size = 5)
+T2_aracneA<-delete.vertices(T2_aracne, which(degree(T2_aracne) == 0))
+T2_cluster<-cluster_optimal(T2_aracneA)
+plot(T2_cluster, T2_aracneA, vertex.label.color="black",
+     vertex.label.cex=.5,layout=layout_with_kk, vertex.size = 5)
+T3_aracneA<-delete.vertices(T3_aracne, which(degree(T3_aracne) == 0))
+T3_cluster<-cluster_optimal(T3_aracneA)
+plot(T3_cluster, T3_aracneA, vertex.label.color="black",
+     vertex.label.cex=.5,layout=layout_with_kk, vertex.size = 5)
+# Similaridad de clusterización entre capas (los comandos de abajo requieren de una alta capacidad de procesamiento).
+#T1_cluster<-cluster_optimal(T1_aracne)
+#T2_cluster<-cluster_optimal(T2_aracne)
+#T3_cluster<-cluster_optimal(T3_aracne)
+#compare(T1_cluster, T2_cluster, method = "rand")
+#compare(T2_cluster, T3_cluster, method = "rand")
+#compare(T1_cluster, T3_cluster, method = "rand")
+#compare(T1_cluster, T2_cluster, method = "nmi")
+#compare(T2_cluster, T3_cluster, method = "nmi")
+#compare(T1_cluster, T3_cluster, method = "nmi")
+```
+Análisis de clusters con algoritmo fast greedy
+```{r cache=FALSE, results=FALSE, warning=FALSE, comment=FALSE, writing=FALSE}
+T1_aracneA<-delete.vertices(T1_aracne, which(degree(T1_aracne) == 0))
+T1_cluster<-cluster_fast_greedy(T1_aracneA)
+plot(T1_cluster, T1_aracneA, vertex.label.color="black",
+     vertex.label.cex=.5,layout=layout_with_kk, vertex.size = 5)
+T2_aracneA<-delete.vertices(T2_aracne, which(degree(T2_aracne) == 0))
+T2_cluster<-cluster_fast_greedy(T2_aracneA)
+plot(T2_cluster, T2_aracneA, vertex.label.color="black",
+     vertex.label.cex=.5,layout=layout_with_kk, vertex.size = 5)
+T3_aracneA<-delete.vertices(T3_aracne, which(degree(T3_aracne) == 0))
+T3_cluster<-cluster_fast_greedy(T3_aracneA)
+plot(T3_cluster, T3_aracneA, vertex.label.color="black",
+     vertex.label.cex=.5,layout=layout_with_kk, vertex.size = 5)
+# Similaridad de clusterización entre capas
+T1_cluster<-cluster_louvain(T1_aracne)
+T2_cluster<-cluster_louvain(T2_aracne)
+T3_cluster<-cluster_louvain(T3_aracne)
+compare(T1_cluster, T2_cluster, method = "rand")
+compare(T2_cluster, T3_cluster, method = "rand")
+compare(T1_cluster, T3_cluster, method = "rand")
+compare(T1_cluster, T2_cluster, method = "nmi")
+compare(T2_cluster, T3_cluster, method = "nmi")
+compare(T1_cluster, T3_cluster, method = "nmi")
 ```
 Visualización de redes individuales en función del degree.
 ```{r cache=FALSE, results=FALSE, warning=FALSE, comment=FALSE, writing=FALSE}

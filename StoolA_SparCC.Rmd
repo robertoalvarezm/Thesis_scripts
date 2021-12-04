@@ -93,12 +93,12 @@ Grupos<-c("Before travel", "During travel", "After travel")
 legend("topleft", Grupos, col = c("Red", "Blue", "Green"), lty = 1) 
 
 # Normalidad y resumen estadístico
-shapiro.test(degree(T1_aracne))
-summary(degree(T1_aracne))
-shapiro.test(degree(T2_aracne))
-summary(degree(T2_aracne))
-shapiro.test(degree(T3_aracne))
-summary(degree(T3_aracne))
+shapiro.test(degree(T1_SparCC))
+summary(degree(T1_SparCC))
+shapiro.test(degree(T2_SparCC))
+summary(degree(T2_SparCC))
+shapiro.test(degree(T3_SparCC))
+summary(degree(T3_SparCC))
 ```
 Se colorean las redes a nivel de phylum usando la función v_colored()
 ```{r cache=FALSE, results=FALSE, warning=FALSE, comment=FALSE, writing=FALSE}
@@ -171,7 +171,7 @@ plot_multiplex3D(g.list, layer.layout=lay,
                  node.colors.aggr=vertex.attributes(T1_SparCC)$color,
                  show.aggregate=T)
 ```
-Análisis de clusters
+Análisis de clusters por método Louvain
 ```{r cache=FALSE, results=FALSE, warning=FALSE, comment=FALSE, writing=FALSE}
 T1_SparCCA<-delete.vertices(T1_SparCC, which(degree(T1_SparCC) == 0))
 T1_cluster<-cluster_louvain(T1_SparCCA)
@@ -183,6 +183,36 @@ plot(T2_cluster, T2_SparCCA, vertex.label.color="black",
      vertex.label.cex=.5,layout=layout_with_kk, vertex.size = 5)
 T3_SparCCA<-delete.vertices(T3_SparCC, which(degree(T3_SparCC) == 0))
 T3_cluster<-cluster_louvain(T3_SparCCA)
+plot(T3_cluster, T3_SparCCA, vertex.label.color="black",
+     vertex.label.cex=.5,layout=layout_with_kk, vertex.size = 5)
+```
+Análisis de clusters por método optimal
+```{r eval=FALSE}
+T1_SparCCA<-delete.vertices(T1_SparCC, which(degree(T1_SparCC) == 0))
+T1_cluster<-cluster_optimal(T1_SparCCA)
+plot(T1_cluster, T1_SparCCA, vertex.label.color="black",
+     vertex.label.cex=.5,layout=layout_with_kk, vertex.size = 5)
+T2_SparCCA<-delete.vertices(T2_SparCC, which(degree(T2_SparCC) == 0))
+T2_cluster<-cluster_optimal(T2_SparCCA)
+plot(T2_cluster, T2_SparCCA, vertex.label.color="black",
+     vertex.label.cex=.5,layout=layout_with_kk, vertex.size = 5)
+T3_SparCCA<-delete.vertices(T3_SparCC, which(degree(T3_SparCC) == 0))
+T3_cluster<-cluster_optimal(T3_SparCCA)
+plot(T3_cluster, T3_SparCCA, vertex.label.color="black",
+     vertex.label.cex=.5,layout=layout_with_kk, vertex.size = 5)
+```
+Análisis de clusters por método fast-greedy
+```{r}
+T1_SparCCA<-delete.vertices(T1_SparCC, which(degree(T1_SparCC) == 0))
+T1_cluster<-cluster_fast_greedy(T1_SparCCA)
+plot(T1_cluster, T1_SparCCA, vertex.label.color="black",
+     vertex.label.cex=.5,layout=layout_with_kk, vertex.size = 5)
+T2_SparCCA<-delete.vertices(T2_SparCC, which(degree(T2_SparCC) == 0))
+T2_cluster<-cluster_fast_greedy(T2_SparCCA)
+plot(T2_cluster, T2_SparCCA, vertex.label.color="black",
+     vertex.label.cex=.5,layout=layout_with_kk, vertex.size = 5)
+T3_SparCCA<-delete.vertices(T3_SparCC, which(degree(T3_SparCC) == 0))
+T3_cluster<-cluster_fast_greedy(T3_SparCCA)
 plot(T3_cluster, T3_SparCCA, vertex.label.color="black",
      vertex.label.cex=.5,layout=layout_with_kk, vertex.size = 5)
 ```
