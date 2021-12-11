@@ -250,11 +250,33 @@ El análisis de clusters se realizó por el método Louvain, mismo que optimiza 
 ```{r}
 insect_sparCCA<-delete.vertices(insect_sparCC, which(degree(insect_sparCC) == 0))
 insect_cluster<-cluster_louvain(insect_sparCCA)
-plot(insect_cluster, insect_sparCCA, vertex.label.color="black",
+plot(insect_cluster, insect_sparCCA, vertex.label.color="black", main = "Insect",
      vertex.label.cex=.5,layout=layout_with_kk, vertex.size = 5)
 plant_sparCCA<-delete.vertices(plant_sparCC, which(degree(plant_sparCC) == 0))
 plant_cluster<-cluster_louvain(plant_sparCCA)
-plot(plant_cluster, plant_sparCCA, vertex.label.color="black",
+plot(plant_cluster, plant_sparCCA, vertex.label.color="black", main = "Plant",
+     vertex.label.cex=.5,layout=layout_with_kk, vertex.size = 5)
+```
+Clusterización por el método optimal.
+```{r eval=FALSE}
+insect_sparCCA<-delete.vertices(insect_sparCC, which(degree(insect_sparCC) == 0))
+insect_cluster<-cluster_optimal(insect_sparCCA)
+plot(insect_cluster, insect_sparCCA, vertex.label.color="black", main = "Insect",
+     vertex.label.cex=.5,layout=layout_with_kk, vertex.size = 5)
+plant_sparCCA<-delete.vertices(plant_sparCC, which(degree(plant_sparCC) == 0))
+plant_cluster<-cluster_optimal(plant_sparCCA)
+plot(plant_cluster, plant_sparCCA, vertex.label.color="black", main = "Plant",
+     vertex.label.cex=.5,layout=layout_with_kk, vertex.size = 5)
+```
+Clusterización por el método fast-greedy.
+```{r}
+insect_sparCCA<-delete.vertices(insect_sparCC, which(degree(insect_sparCC) == 0))
+insect_cluster<-cluster_fast_greedy(insect_sparCCA)
+plot(insect_cluster, insect_sparCCA, vertex.label.color="black", main = "Insect",
+     vertex.label.cex=.5,layout=layout_with_kk, vertex.size = 5)
+plant_sparCCA<-delete.vertices(plant_sparCC, which(degree(plant_sparCC) == 0))
+plant_cluster<-cluster_fast_greedy(plant_sparCCA)
+plot(plant_cluster, plant_sparCCA, vertex.label.color="black", main = "Plant",
      vertex.label.cex=.5,layout=layout_with_kk, vertex.size = 5)
 ```
 Construimos una función que nos permite colorear los nodos en función de su centralidad. El objeto ctr_type puede corresponder a "degree", "betweenness" y "closeness".
