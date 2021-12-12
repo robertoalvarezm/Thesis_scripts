@@ -237,16 +237,37 @@ T3_aracneA<-delete.vertices(T3_aracne, which(degree(T3_aracne) == 0))
 T3_cluster<-cluster_louvain(T3_aracneA)
 plot(T3_cluster, T3_aracneA, vertex.label.color="black",
      vertex.label.cex=.5,layout=layout_with_kk, vertex.size = 5)
-# Similaridad de clusterización entre capas
+```
+Comparación de la clusterización de las capas
+```{r}
 T1_cluster<-cluster_louvain(T1_aracne)
 T2_cluster<-cluster_louvain(T2_aracne)
 T3_cluster<-cluster_louvain(T3_aracne)
-compare(T1_cluster, T2_cluster, method = "rand")
-compare(T2_cluster, T3_cluster, method = "rand")
-compare(T1_cluster, T3_cluster, method = "rand")
-compare(T1_cluster, T2_cluster, method = "nmi")
-compare(T2_cluster, T3_cluster, method = "nmi")
-compare(T1_cluster, T3_cluster, method = "nmi")
+clusters<-list(T1_cluster, T2_cluster, T3_cluster)
+# Construímos la función corr_clusters()
+# method = c("vi", "nmi", "split.join", "rand", "adjusted.rand")
+corr_clusters<-function(clusters, method, as.corrplot){
+  require(corrplot)
+  require(igraph)
+  corr_rows<-c()
+  all_cols<-c()
+  for(j in 1:length(clusters)){
+    for(i in 1:length(clusters)){
+      corr_rows[i]<-compare(clusters[[j]], clusters[[i]], method)
+    }
+    all_cols<-c(all_cols, corr_rows)
+  }
+  corr_mat<-matrix(all_cols, length(clusters), length(clusters))
+  if(as.corrplot==F){
+    return(corr_mat)
+  }
+  if(as.corrplot==T){
+    return(corrplot(corr_mat))
+  }
+}
+# Si as.corrplot = T, se genera un gráfico de correlaciones.
+# De lo contrario se obtiene una matriz.
+corr_clusters(clusters, "adjusted.rand", as.corrplot = T)
 ```
 Análisis de clusters con algoritmo optimal
 ```{r cache=FALSE, results=FALSE, warning=FALSE, comment=FALSE, writing=FALSE}
