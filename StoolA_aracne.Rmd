@@ -268,7 +268,7 @@ corr_clusters<-function(clusters, method, as.corrplot){
 }
 # Si as.corrplot = T, se genera un gráfico de correlaciones.
 # De lo contrario se obtiene una matriz.
-corr_clusters(clusters, "adjusted.rand", as.corrplot = T)
+corr_clusters(clusters, "adjusted.rand", as.corrplot = F)
 ```
 Análisis de clusters con algoritmo optimal
 ```{r cache=FALSE, results=FALSE, warning=FALSE, comment=FALSE, writing=FALSE}
