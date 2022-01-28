@@ -227,7 +227,7 @@ plot_multiplex3D(g.list, layer.layout=lay,
                  node.colors=vertex.attributes(insect_sparCC)$color,
                  edge.colors="white",
                  node.colors.aggr=vertex.attributes(insect_sparCC)$color,
-                 show.aggregate=T)
+                 show.aggregate=F)
 ```
 Esta función nos permite clasificar los nodos en categorías taxonómicas superiores, es decir, que si los nodos representan géneros o familias, esta función permite clasificarlos a niveles superiores tales como Phylum.
 ```{r}
