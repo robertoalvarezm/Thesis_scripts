@@ -1,0 +1,316 @@
+# Temporal Stool_B SparCC {-}
+
+Se cargan los datos del sujeto B almacenados en el paquete seqtime. Se colapsaron los datos a nivel de género y se separaron los datos correspondientes a cada capa, que corresponden a antes, durante y después de la infección por Salmonella, que se sucedió entre los días 151 y 159 del muestreo. El estudio hecho por David et al. (2014) mostró que la dinámica poblacional no se recupera tras el periodo de infección.
+```{r echo=FALSE, cache=FALSE, results=FALSE, warning=FALSE, comment=FALSE, writing=FALSE}
+library(seqtime)
+library(igraph)
+library(phyloseq)
+data("david_stool_lineages")
+data("david_stoolB_otus")
+
+# Se definen los datos de entrada
+O_table <- david_stoolB_otus
+T_table <- david_stool_lineages
+# Se colapsan los datos a nivel de género
+T_Collapsed<-T_collapse(T_table = T_table, O_table = O_table,
+                        names_level = "V7")
+# Eliminamos a los no-clasificados
+T_Collapsed<-T_Collapsed[, -c(which(colnames(T_Collapsed) == "none"))]
+dim(T_Collapsed)
+
+T1_mat <- T_Collapsed[1:150,]
+T2_mat <- T_Collapsed[151:159,]
+T3_mat <- T_Collapsed[160:dim(T_Collapsed)[1],]
+```
+Inferimos las redes mediante el algoritmo SparCC.
+```{r}
+library(SpiecEasi)
+
+sparccNetA <- sparcc(T1_mat)
+sparccNetA <- abs(sparccNetA$Cor) >= 0.4
+T1_SparCC <- adj2igraph(sparccNetA)
+vertex.attributes(T1_SparCC) <- list(name = colnames(T1_mat))
+plot_network(T1_SparCC)
+
+sparccNetB <- sparcc(T2_mat)
+sparccNetB <- abs(sparccNetB$Cor) >= 0.4
+T2_SparCC <- adj2igraph(sparccNetB)
+vertex.attributes(T2_SparCC) <- list(name = colnames(T2_mat))
+plot_network(T2_SparCC)
+
+sparccNetC <- sparcc(T3_mat)
+sparccNetC <- abs(sparccNetC$Cor) >= 0.4
+T3_SparCC <- adj2igraph(sparccNetC)
+vertex.attributes(T3_SparCC) <- list(name = colnames(T3_mat))
+plot_network(T3_SparCC)
+```
+Distribución del degree
+```{r cache=FALSE, results=FALSE, warning=FALSE, comment=FALSE, writing=FALSE}
+par(mfrow=c(1,3))
+
+# Calculamos la densidad
+dx1 <- density(degree(T1_SparCC), bw = 1)
+dx2 <- density(degree(T2_SparCC), bw = 1)
+dx3 <- density(degree(T3_SparCC), bw = 1)
+
+# Creamos los histogramas con sus respectivas curvas de densidad y ruido asociado en el eje x.
+hist(degree(T1_SparCC), freq = FALSE, main = "Before infection", ylab = "Density",
+     col = "khaki")
+lines(dx1, lwd = 2, col = "red")
+rug(jitter(degree(T1_SparCC)))
+
+hist(degree(T2_SparCC), freq = FALSE, main = "During infection", ylab = "Density",
+     col = "khaki")
+lines(dx2, lwd = 2, col = "blue")
+rug(jitter(degree(T2_SparCC)))
+
+hist(degree(T3_SparCC), freq = FALSE, main = "After infection", ylab = "Density",
+     col = "khaki")
+lines(dx3, lwd = 2, col = "green")
+rug(jitter(degree(T2_SparCC)))
+
+par(mfrow=c(1,1))
+```
+Comparación de la distribución del degree entre capas y análisis de normalidad.
+```{r cache=FALSE, results=FALSE, warning=FALSE, comment=FALSE, writing=FALSE}
+# Aumentamos la resolución para distinguir major las diferencias
+dx1 <- density(degree(T1_SparCC), bw = 0.1)
+dx2 <- density(degree(T2_SparCC), bw = 0.1)
+dx3 <- density(degree(T3_SparCC), bw = 0.1)
+
+# Graficamos las densidades
+plot(dx1, lwd = 2, main = "Degree dendities", xlab = "",
+     col = "red", xlim = c(-4, 6), ylim = c(0, 0.5))
+rug(jitter(degree(T1_SparCC)), col = "red")
+
+lines(dx2, lwd = 2, col = "blue")
+rug(jitter(degree(T2_SparCC)), col = "blue")
+
+lines(dx3, lwd = 2, col = "green")
+rug(jitter(degree(T3_SparCC)), col = "green")
+
+Grupos<-c("Before infection", "During infection", "After infection")
+legend("topleft", Grupos, col = c("Red", "Blue", "Green"), lty = 1) 
+
+# Normalidad y resumen estadístico
+shapiro.test(degree(T1_SparCC))
+summary(degree(T1_SparCC))
+shapiro.test(degree(T2_SparCC))
+summary(degree(T2_SparCC))
+shapiro.test(degree(T3_SparCC))
+summary(degree(T3_SparCC))
+```
+Se colorean las redes a nivel de phylum usando la función v_colored()
+```{r echo=FALSE, cache=FALSE, results=FALSE, warning=FALSE, comment=FALSE, writing=FALSE}
+unq<-unique(T_table[,"V3"])
+colors<-rainbow(length(unq))
+T1_SparCC<-v_colored(T1_SparCC, T_table, g_tax = "V3",
+               p_tax = "V7", g_colors = colors)
+T2_SparCC<-v_colored(T2_SparCC, T_table, g_tax = "V3",
+               p_tax = "V7", g_colors = colors)
+T3_SparCC<-v_colored(T3_SparCC, T_table, g_tax = "V3",
+               p_tax = "V7", g_colors = colors)
+#Gráfico de periodo previo al viaje
+plot(T1_SparCC, vertex.label.color="black",
+     vertex.color = vertex.attributes(T1_SparCC)$color, vertex.label.cex=.5,
+     vertex.label.dist=1,layout=layout_with_kk, vertex.size = 5)
+legend(x=-2.5, y=1, unq, title = "Before infection", pch=21, pt.bg=colors, pt.cex=2, cex=.8, bty="n", ncol=1)
+
+#Gráfico de periodo previo al viaje
+plot(T2_SparCC, vertex.label.color="black",
+     vertex.color = vertex.attributes(T2_SparCC)$color, vertex.label.cex=.5,
+     vertex.label.dist=1,layout=layout_with_kk, vertex.size = 5)
+legend(x=-2.5, y=1, unq, title = "During infection", pch=21, pt.bg=colors, pt.cex=2, cex=.8, bty="n", ncol=1)
+
+#Gráfico de periodo previo al viaje
+plot(T3_SparCC, vertex.label.color="black",
+     vertex.color = vertex.attributes(T3_SparCC)$color, vertex.label.cex=.5,
+     vertex.label.dist=1,layout=layout_with_kk, vertex.size = 5)
+legend(x=-2.5, y=1, unq, title = "After infection", pch=21, pt.bg=colors, pt.cex=2, cex=.8, bty="n", ncol=1)
+```
+Graficamos las abundancias relativas de ambas capas con la función g_abundance()
+```{r cache=FALSE, results=FALSE, warning=FALSE, comment=FALSE, writing=FALSE}
+T1_SparCC<-g_abundance(layer_mat = T1_mat, g = T1_SparCC)
+T2_SparCC<-g_abundance(layer_mat = T2_mat, g = T2_SparCC)
+T3_SparCC<-g_abundance(layer_mat = T3_mat, g = T3_SparCC)
+plot(T1_SparCC, vertex.label.color="black",
+      vertex.color = vertex.attributes(T1_SparCC)$rel_ab, vertex.label.cex=.5,
+      vertex.label.dist=1,layout=layout_with_kk, vertex.size = 5)
+plot(T2_SparCC, vertex.label.color="black",
+      vertex.color = vertex.attributes(T2_SparCC)$rel_ab, vertex.label.cex=.5,
+      vertex.label.dist=1,layout=layout_with_kk, vertex.size = 5)
+plot(T3_SparCC, vertex.label.color="black",
+      vertex.color = vertex.attributes(T3_SparCC)$rel_ab, vertex.label.cex=.5,
+      vertex.label.dist=1,layout=layout_with_kk, vertex.size = 5)
+```
+Generamos un objeto muxViz como una lista de redes igraph, y se construye una matriz de abundancias.
+```{r cache=FALSE, results=FALSE, warning=FALSE, comment=FALSE, writing=FALSE}
+library(muxViz)
+g.list<-list(T1_SparCC, T2_SparCC, T3_SparCC)
+T1_ab<-colSums(T1_mat)
+T1_ab<-as.numeric((T1_ab)/T1_ab[which.max(T1_ab)])
+T2_ab<-colSums(T2_mat)
+T2_ab<-as.numeric((T2_ab)/T2_ab[which.max(T2_ab)])
+T3_ab<-colSums(T3_mat)
+T3_ab<-as.numeric((T3_ab)/T3_ab[which.max(T3_ab)])
+
+abundances<-c(T1_ab, T2_ab, T3_ab)
+Nodes<-length(V(T1_SparCC))
+Layers<-length(g.list)
+node.ab.matrix <- matrix((abundances+1)*10, Nodes, Layers)
+
+lay <- layoutMultiplex(g.list, layout="fr", ggplot.format=F, box=T)
+plot_multiplex3D(g.list, layer.layout=lay,
+                 layer.colors=rainbow(length(g.list)),
+                 layer.shift.x=0.5, layer.space=2,
+                 layer.labels=c("Before infection", "During infection", "After infection"),
+                 layer.labels.cex=1.5, node.size.values=node.ab.matrix,
+                 node.size.scale=0.6,
+                 node.colors=vertex.attributes(T1_SparCC)$color,
+                 edge.colors="white",
+                 node.colors.aggr=vertex.attributes(T1_SparCC)$color,
+                 show.aggregate=T)
+```
+Análisis de clusters
+```{r cache=FALSE, results=FALSE, warning=FALSE, comment=FALSE, writing=FALSE}
+T1_SparCCB<-delete.vertices(T1_SparCC, which(degree(T1_SparCC) == 0))
+T1_cluster<-cluster_louvain(T1_SparCCB)
+plot(T1_cluster, T1_SparCCB, vertex.label.color="black",
+     vertex.label.cex=.5,layout=layout_with_kk, vertex.size = 5)
+T2_SparCCB<-delete.vertices(T2_SparCC, which(degree(T2_SparCC) == 0))
+T2_cluster<-cluster_louvain(T2_SparCCB)
+plot(T2_cluster, T2_SparCCB, vertex.label.color="black",
+     vertex.label.cex=.5,layout=layout_with_kk, vertex.size = 5)
+T3_SparCCB<-delete.vertices(T3_SparCC, which(degree(T3_SparCC) == 0))
+T3_cluster<-cluster_louvain(T3_SparCCB)
+plot(T3_cluster, T3_SparCCB, vertex.label.color="black",
+     vertex.label.cex=.5,layout=layout_with_kk, vertex.size = 5)
+```
+Visualización de redes individuales en función del degree.
+```{r cache=FALSE, results=FALSE, warning=FALSE, comment=FALSE, writing=FALSE}
+g.list_d<-ctr(g.list, ctr_type = "degree")
+
+plot(g.list_d[[1]], vertex.label.color="black",
+     vertex.color = vertex.attributes(g.list_d[[1]])$hl, vertex.label.cex=.5,
+     vertex.label.dist=1,layout=layout_with_kk, vertex.size = 5)
+title(main = "Before infection")
+
+plot(g.list_d[[2]], vertex.label.color="black",
+     vertex.color = vertex.attributes(g.list_d[[2]])$hl, vertex.label.cex=.5,
+     vertex.label.dist=1,layout=layout_with_kk, vertex.size = 5)
+title(main = "During infection")
+
+plot(g.list_d[[3]], vertex.label.color="black",
+     vertex.color = vertex.attributes(g.list_d[[3]])$hl, vertex.label.cex=.5,
+     vertex.label.dist=1,layout=layout_with_kk, vertex.size = 5)
+title(main = "After infection")
+```
+Construcción de gráfico de red multiplex 3D para degree.
+```{r cache=FALSE, results=FALSE, warning=FALSE, comment=FALSE, writing=FALSE}
+hl1<-as.vector(vertex.attributes(g.list_d[[1]])$hl)
+hl2<-as.vector(vertex.attributes(g.list_d[[2]])$hl)
+hl3<-as.vector(vertex.attributes(g.list_d[[3]])$hl)
+hl_colors<-c(hl1, hl2, hl3)
+Nodes<-length(V(g.list[[1]]))
+Layers<-length(g.list)
+node.colors.matrix <- matrix(hl_colors, Nodes, Layers)
+lay <- layoutMultiplex(g.list_d, layout="fr", ggplot.format=F, box=T)
+plot_multiplex3D(g.list_d, layer.layout=lay,
+                 layer.colors=rainbow(length(g.list_d)),
+                 layer.shift.x=0.5, layer.space=2,
+                 layer.labels=c("Before infection", "During infection", "After infection"),
+                 layer.labels.cex=1.5, node.size.values="auto",
+                 node.size.scale=0.8, node.colors=node.colors.matrix,
+                 edge.colors="#dadada", show.aggregate=F)
+```
+Construcción de gráfico de red multiplex 3D para betweenness.
+```{r cache=FALSE, results=FALSE, warning=FALSE, comment=FALSE, writing=FALSE}
+g.list_bt<-ctr(g.list, ctr_type = "betweenness")
+hl1<-as.vector(vertex.attributes(g.list_bt[[1]])$hl)
+hl2<-as.vector(vertex.attributes(g.list_bt[[2]])$hl)
+hl3<-as.vector(vertex.attributes(g.list_bt[[3]])$hl)
+hl_colors<-c(hl1, hl2, hl3)
+Nodes<-length(V(g.list[[1]]))
+Layers<-length(g.list)
+node.colors.matrix <- matrix(hl_colors, Nodes, Layers)
+lay <- layoutMultiplex(g.list_bt, layout="fr", ggplot.format=F, box=T)
+plot_multiplex3D(g.list_bt, layer.layout=lay,
+                 layer.colors=rainbow(length(g.list_bt)),
+                 layer.shift.x=0.5, layer.space=2,
+                 layer.labels=c("Before infection", "During infection", "After infection"),
+                 layer.labels.cex=1.5, node.size.values="auto",
+                 node.size.scale=0.8, node.colors=node.colors.matrix,
+                 edge.colors="#dadada", show.aggregate=F)
+```
+Generamos redes agregadas para cada tipo de centralidad y las introducimos como un objeto muxViz. Generamos una matriz de colores correspondiente a tres tipos distintos de centralidades: degree, betweenness.
+```{r}
+net_d<-GetAggregateNetworkFromNetworkList(g.list_d)
+net_bt<-GetAggregateNetworkFromNetworkList(g.list_bt)
+central_muxlist<-list(net_d, net_bt)
+
+d<-ctr(central_muxlist, ctr_type = "degree")
+hl_d<-as.vector(vertex.attributes(d[[1]])$hl)
+bt<-ctr(central_muxlist, ctr_type = "betweenness")
+hl_bt<-as.vector(vertex.attributes(bt[[2]])$hl)
+
+hl_colors2<-c(hl_d, hl_bt)
+Nodes<-length(V(central_muxlist[[1]]))
+Layers<-length(central_muxlist)
+node.colors.matrix <- matrix(hl_colors2, Nodes, Layers)
+```
+Se genera una matriz de abundancias.
+```{r}
+collapsed_ab<-colSums(T_Collapsed)
+collapsed_ab<-as.numeric(collapsed_ab/collapsed_ab[which.max(collapsed_ab)])
+collapsed_ab<-c(collapsed_ab, collapsed_ab, collapsed_ab)
+Nodes<-length(V(central_muxlist[[1]]))
+Layers<-length(central_muxlist)
+node.ab.matrix <- matrix((collapsed_ab+1)*10, Nodes, Layers)
+```
+Construímos un gráfico 3D representando los tres tipos de centralidad en un gradiente de color y el tamaño de los nodos en función de las abundancias.
+```{r cache=FALSE, results=FALSE, warning=FALSE, comment=FALSE, writing=FALSE}
+
+lay <- layoutMultiplex(central_muxlist, layout="fr", ggplot.format=F, box=T)
+plot_multiplex3D(central_muxlist, layer.layout=lay,
+                 layer.colors=rainbow(length(central_muxlist)),
+                 layer.shift.x=0.5, layer.space=2,
+                 layer.labels=c("Degree", "Betweenness"),    
+                 layer.labels.cex=1.5,
+                 node.size.values=node.ab.matrix, node.size.scale=0.8,
+                 node.colors=node.colors.matrix, edge.colors="#dadada",
+                 show.aggregate=F)
+```
+Identificamos diferencias significativas en las abundancias de los nodos entre capas mediante la función diff_nodes_graph(). Debido a que la función trabaja con redes bipartitas, las listas solo deben contener dos elementos cada una. La red resultante es una fusión de las capas de la red bipartita.
+Comparación entre la primera y la segunda capa.
+```{r}
+mat_list<-list(T1_mat, T2_mat)
+g.list<-list(T1_SparCC, T2_SparCC)
+#Consideramos solo los 20 nodos más importantes y una alpha de 0.1.
+diff_g<-diff_nodes_graph(T_Collapsed, n = 20, mat_list, g.list, alpha = 0.05)
+#En el grafo resultante, aquellos nodos que cambian están representados con rojo
+#y aquellos sin diferencias significativas en azul.
+plot(diff_g, vertex.label.color="black", vertex.color = vertex.attributes(diff_g)$colorA,
+     vertex.label.cex=.5, vertex.label.dist=1,layout=layout_with_kk, vertex.size = 5)
+```
+Comparación entre la segunda y la tercera capa.
+```{r}
+mat_list<-list(T2_mat, T3_mat)
+g.list<-list(T2_SparCC, T3_SparCC)
+#Consideramos solo los 20 nodos más importantes y una alpha de 0.1.
+diff_g<-diff_nodes_graph(T_Collapsed, n = 20, mat_list, g.list, alpha = 0.05)
+#En el grafo resultante, aquellos nodos que cambian están representados con rojo
+#y aquellos sin diferencias significativas en azul.
+plot(diff_g, vertex.label.color="black", vertex.color = vertex.attributes(diff_g)$colorA,
+     vertex.label.cex=.5, vertex.label.dist=1,layout=layout_with_kk, vertex.size = 5)
+```
+Comparación entre la primera y la tercera capa.
+```{r}
+mat_list<-list(T1_mat, T3_mat)
+g.list<-list(T1_aracne, T3_aracne)
+#Consideramos solo los 20 nodos más importantes y una alpha de 0.1.
+diff_g<-diff_nodes_graph(T_Collapsed, n = 20, mat_list, g.list, alpha = 0.05)
+#En el grafo resultante, aquellos nodos que cambian están representados con rojo
+#y aquellos sin diferencias significativas en azul.
+plot(diff_g, vertex.label.color="black", vertex.color = vertex.attributes(diff_g)$colorA,
+     vertex.label.cex=.5, vertex.label.dist=1,layout=layout_with_kk, vertex.size = 5)
+```
