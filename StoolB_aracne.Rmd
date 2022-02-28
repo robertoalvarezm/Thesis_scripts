@@ -225,17 +225,17 @@ shapiro.test(Shannon3)
 ```
 Análisis de clusters
 ```{r cache=FALSE, results=FALSE, warning=FALSE, comment=FALSE, writing=FALSE}
-T1_aracneA<-delete.vertices(T1_aracne, which(degree(T1_aracne) == 0))
-T1_cluster<-cluster_louvain(T1_aracneA)
-plot(T1_cluster, T1_aracneA, vertex.label.color="black",
+T1_aracneB<-delete.vertices(T1_aracne, which(degree(T1_aracne) == 0))
+T1_cluster<-cluster_louvain(T1_aracneB)
+plot(T1_cluster, T1_aracneB, vertex.label.color="black",
      vertex.label.cex=.5,layout=layout_with_kk, vertex.size = 5)
-T2_aracneA<-delete.vertices(T2_aracne, which(degree(T2_aracne) == 0))
-T2_cluster<-cluster_louvain(T2_aracneA)
-plot(T2_cluster, T2_aracneA, vertex.label.color="black",
+T2_aracneB<-delete.vertices(T2_aracne, which(degree(T2_aracne) == 0))
+T2_cluster<-cluster_louvain(T2_aracneB)
+plot(T2_cluster, T2_aracneB, vertex.label.color="black",
      vertex.label.cex=.5,layout=layout_with_kk, vertex.size = 5)
-T3_aracneA<-delete.vertices(T3_aracne, which(degree(T3_aracne) == 0))
-T3_cluster<-cluster_louvain(T3_aracneA)
-plot(T3_cluster, T3_aracneA, vertex.label.color="black",
+T3_aracneB<-delete.vertices(T3_aracne, which(degree(T3_aracne) == 0))
+T3_cluster<-cluster_louvain(T3_aracneB)
+plot(T3_cluster, T3_aracneB, vertex.label.color="black",
      vertex.label.cex=.5,layout=layout_with_kk, vertex.size = 5)
 ```
 Visualización de redes individuales en función del degree.

@@ -79,7 +79,7 @@ dx2 <- density(degree(T2_SparCC), bw = 0.1)
 dx3 <- density(degree(T3_SparCC), bw = 0.1)
 
 # Graficamos las densidades
-plot(dx1, lwd = 2, main = "Degree dendities", xlab = "",
+plot(dx1, lwd = 2, main = "Degree densities", xlab = "",
      col = "red", xlim = c(-4, 6), ylim = c(0, 0.5))
 rug(jitter(degree(T1_SparCC)), col = "red")
 
