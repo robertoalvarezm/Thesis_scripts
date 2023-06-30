@@ -217,6 +217,9 @@ Layers<-length(g.list)
 node.ab.matrix <- matrix((abundances+1)*10, Nodes, Layers)
 ```
 Construímos el gráfico 3D de una red multicapa multiplex con el paquete muxViz.
+
+###### ESTO FALLLLLLAA
+
 ```{r echo=FALSE, cache=FALSE, results=FALSE, warning=FALSE, comment=FALSE, warning=FALSE}
 lay <- layoutMultiplex(g.list, layout="fr", ggplot.format=F, box=T)
 plot_multiplex3D(g.list, layer.layout=lay,
